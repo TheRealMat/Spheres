@@ -200,7 +200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ballSpeed: 1
-  ballDistance: 0.6
+  ballDistance: 0.5
   pathCreator: {fileID: 1316162825}
   endOfPathInstruction: 0
   ballPrefab: {fileID: 2976094773279496845, guid: f17dc9405c70fc641ae2ac31faaaaf83, type: 3}

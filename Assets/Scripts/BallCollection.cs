@@ -47,17 +47,20 @@ public class BallCollection : MonoBehaviour
             }
         }
 
+        // ball is the last ball and so should move
+        if (IsLastBall(ball))
+        {
+            GoForward(ball);
+        }
         // if we are too far away from the ball behind us we should move back
-        // we should not go back if this is the last ball
-        if (!IsLastBall(ball) && BallTooFar(ball, ball.backwardBall))
+        else if (BallTooFar(ball, ball.backwardBall))
         {
             GoBackward(ball);
         }
-        // otherwise move forward
+        // we are in line, so position should be set accordingly
         else
         {
-            // probably go forward
-            GoForward(ball);
+            SetPosition(ball, ball.distanceTravelled = ball.backwardBall.distanceTravelled + ballDistance);
         }
 
     }
@@ -80,6 +83,11 @@ public class BallCollection : MonoBehaviour
         ball.distanceTravelled -= ballSpeed * 10 * Time.deltaTime;
         ball.transform.position = pathCreator.path.GetPointAtDistance(ball.distanceTravelled, endOfPathInstruction);
         ball.transform.rotation = pathCreator.path.GetRotationAtDistance(ball.distanceTravelled, endOfPathInstruction);
+    }
+    void SetPosition(Ball ball, float distanceTravelled)
+    {
+        ball.transform.position = pathCreator.path.GetPointAtDistance(distanceTravelled, endOfPathInstruction);
+        ball.transform.rotation = pathCreator.path.GetRotationAtDistance(distanceTravelled, endOfPathInstruction);
     }
 
     Ball FindBackBall(Ball ball)
