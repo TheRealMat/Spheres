@@ -12,8 +12,6 @@ public class BallCollection : MonoBehaviour
     public PathCreator pathCreator;
     public EndOfPathInstruction endOfPathInstruction;
     public GameObject ballPrefab;
-    BallCollection forwardCollection;
-    BallCollection backwardCollection;
     void CreateBall()
     {
         GameObject prefab = Instantiate(ballPrefab);
@@ -22,45 +20,41 @@ public class BallCollection : MonoBehaviour
         AddBall(ball, 0);
     }
 
+    private void Start()
+    {
+        CreateBall();
+        CreateBall();
+        CreateBall();
+        CreateBall();
+        CreateBall();
+        CreateBall();
+    }
+
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            CreateBall();
-        }
         foreach (Ball ball in Balls)
         {
+            ball.gameObject.name = Balls.IndexOf(ball).ToString();
             MoveBall(ball);
         }
     }
 
     void MoveBall(Ball ball)
     {
-        if (ball.backwardBall == null)
-        {
-            if (!IsLastBall(ball))
-            {
-                // ball has no ball behind it and is not the ball furthest back
-                // that means we should set the last ball because it is null
-                ball.backwardBall = FindBackBall(ball);
-
-            }
-        }
-
         // ball is the last ball and so should move
         if (IsLastBall(ball))
         {
             GoForward(ball);
         }
         // if we are too far away from the ball behind us we should move back
-        else if (BallTooFar(ball, ball.backwardBall))
+        else if (BallTooFar(ball, FindBackBall(ball)))
         {
             GoBackward(ball);
         }
         // we are in line, so position should be set accordingly
         else
         {
-            SetPosition(ball, ball.distanceTravelled = ball.backwardBall.distanceTravelled + ballDistance);
+            SetPosition(ball, ball.distanceTravelled = FindBackBall(ball).distanceTravelled + ballDistance);
         }
 
     }
@@ -68,8 +62,34 @@ public class BallCollection : MonoBehaviour
     void AddBall(Ball ball, int index)
     {
         Balls.Insert(index, ball);
-        ball.forwardBall = FindForwardBall(ball);
-        ball.backwardBall = FindBackBall(ball);
+    }
+    public void AddBallAtPosition(Ball newBall, Ball hitBall, Vector3 collisionPoint)
+    {
+        // point on path closest to impact
+        float pathPosition = pathCreator.path.GetClosestDistanceAlongPath(collisionPoint);
+
+
+        float frontPosDistance = Mathf.Abs(hitBall.distanceTravelled + ballDistance - pathPosition);
+        float backPosDistance = Mathf.Abs(hitBall.distanceTravelled - ballDistance - pathPosition);
+
+        if (frontPosDistance <= backPosDistance)
+        {
+            // go in front of hit ball
+
+            newBall.distanceTravelled = hitBall.distanceTravelled + ballDistance;
+
+            Balls.Insert(Balls.IndexOf(hitBall) + 1, newBall);
+        }
+        else
+        {
+            // take position of current ball (push other balls up)
+
+            newBall.distanceTravelled = hitBall.distanceTravelled - ballDistance;
+
+            Balls.Insert(Balls.IndexOf(hitBall), newBall);
+        }
+        newBall.enabled = true;
+        Destroy(newBall.gameObject.GetComponent<BallProjectile>());
     }
 
     void GoForward(Ball ball)

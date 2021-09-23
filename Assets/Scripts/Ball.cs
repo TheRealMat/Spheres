@@ -5,7 +5,5 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    public Ball forwardBall;
-    public Ball backwardBall;
     public float distanceTravelled;
 }
