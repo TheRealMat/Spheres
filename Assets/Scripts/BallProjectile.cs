@@ -15,7 +15,7 @@ public class BallProjectile : MonoBehaviour
         ballCollection = FindObjectOfType<BallCollection>();
         thisBall = GetComponent<Ball>();
 
-
+        this.GetComponentInChildren<Collider>().gameObject.layer = 7;
 
         // test
         this.gameObject.GetComponentInChildren<Renderer>().material.color = new Color(100, 255, 255);

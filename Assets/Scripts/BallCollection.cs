@@ -88,6 +88,9 @@ public class BallCollection : MonoBehaviour
 
             Balls.Insert(Balls.IndexOf(hitBall), newBall);
         }
+
+        // love magic numbers
+        newBall.gameObject.GetComponentInChildren<Collider>().gameObject.layer = 6;
         newBall.enabled = true;
         Destroy(newBall.gameObject.GetComponent<BallProjectile>());
     }
