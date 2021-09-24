@@ -8,7 +8,7 @@ public class BallCollection : MonoBehaviour
 {
     public float ballSpeed = 0;
     public float ballDistance = 0;
-    List<Ball> Balls = new List<Ball>();
+    LinkedList<Ball> Balls = new LinkedList<Ball>();
     public PathCreator pathCreator;
     public EndOfPathInstruction endOfPathInstruction;
     public GameObject ballPrefab;
@@ -16,8 +16,8 @@ public class BallCollection : MonoBehaviour
     {
         GameObject prefab = Instantiate(ballPrefab);
         Ball ball = prefab.GetComponent<Ball>();
-        ball.distanceTravelled = 0;
-        AddBall(ball, 0);
+        ball.distanceTravelled = Balls.Count * ballDistance;
+        AddBall(ball);
     }
 
     private void Start()
@@ -34,7 +34,6 @@ public class BallCollection : MonoBehaviour
     {
         foreach (Ball ball in Balls)
         {
-            ball.gameObject.name = Balls.IndexOf(ball).ToString();
             MoveBall(ball);
         }
     }
@@ -59,10 +58,11 @@ public class BallCollection : MonoBehaviour
 
     }
 
-    void AddBall(Ball ball, int index)
+    void AddBall(Ball ball)
     {
-        Balls.Insert(index, ball);
+        Balls.AddFirst(ball);
     }
+
     public void AddBallAtPosition(Ball newBall, Ball hitBall, Vector3 collisionPoint)
     {
         // point on path closest to impact
@@ -71,14 +71,13 @@ public class BallCollection : MonoBehaviour
 
         float frontPosDistance = Mathf.Abs(hitBall.distanceTravelled + ballDistance - pathPosition);
         float backPosDistance = Mathf.Abs(hitBall.distanceTravelled - ballDistance - pathPosition);
-
+        LinkedListNode<Ball> hitBallNode = Balls.Find(hitBall);
         if (frontPosDistance <= backPosDistance)
         {
             // go in front of hit ball
 
             newBall.distanceTravelled = hitBall.distanceTravelled + ballDistance;
-
-            Balls.Insert(Balls.IndexOf(hitBall) + 1, newBall);
+            Balls.AddAfter(hitBallNode, newBall);
         }
         else
         {
@@ -86,7 +85,7 @@ public class BallCollection : MonoBehaviour
 
             newBall.distanceTravelled = hitBall.distanceTravelled - ballDistance;
 
-            Balls.Insert(Balls.IndexOf(hitBall), newBall);
+            Balls.AddBefore(hitBallNode, newBall);
         }
 
         // love magic numbers
@@ -115,29 +114,25 @@ public class BallCollection : MonoBehaviour
 
     Ball FindBackBall(Ball ball)
     {
-        int index = Balls.IndexOf(ball);
-        if (index <= 0)
+        LinkedListNode<Ball> ballNode = Balls.Find(ball);
+        if (ballNode.Previous != null)
         {
-            return null;
+            return ballNode.Previous.Value;
         }
-        return Balls[index - 1];
+        return null;
     }
     Ball FindForwardBall(Ball ball)
     {
-        int index = Balls.IndexOf(ball);
-        if (Balls.ElementAtOrDefault(index + 1) == null)
+        LinkedListNode<Ball> ballNode = Balls.Find(ball);
+        if (ballNode.Previous != null)
         {
-            return null;
+            return ballNode.Next.Value;
         }
-        return Balls[index + 1];
+        return null;
     }
     bool IsLastBall(Ball ball)
     {
-        if (Balls[0] == ball)
-        {
-            return true;
-        }
-        return false;
+        return Balls.First.Value == ball;
     }
 
     bool BallTooFar(Ball ball1, Ball ball2)
